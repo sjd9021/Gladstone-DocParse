@@ -72,11 +72,3 @@ insurers = insurers()
 date = date()
 total_amount = total_amount()
 policy = policy_num()
-
-
-print(our_ref)
-print(branch)
-print(insurers)
-print(date)
-print(total_amount)
-print(policy)
