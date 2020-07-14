@@ -11,7 +11,7 @@ def image_to_text(img):
     return a
 
 
-img = cv2.imread("test4.png")
+img = cv2.imread("sam.png")
 text = image_to_text(img)
 text_lines = text.splitlines()
 while "" in text_lines:
@@ -20,6 +20,8 @@ while "" in text_lines:
 
 def date():
     survey_date = text_lines[5]
+    if survey_date == 'invoice':
+        survey_date = text_lines[6]
     return survey_date
 
 
@@ -37,7 +39,7 @@ def policy_num():
 
 def total_amount():
     a = text.rfind('$')
-    return text[a+1:a+5]
+    return text[a:a+7]
 
 
 
@@ -58,7 +60,9 @@ def branch():
 
 def our_ref():
     for i in text_lines:
-        if 'ourref.:' in i or 'ourref:' in i:
+        if 'ourref.:' in i:
+            return i[8:].upper()
+        if 'ourref:' in i:
             return i[7:].upper()
 
 
