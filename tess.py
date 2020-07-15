@@ -4,23 +4,24 @@ import os
 import openpyxl
 import pandas as pd
 from openpyxl.styles import Font, Alignment
+import re
 
 
 class Tesseract():
+    print(0)
     def __init__(self, file):
         self.file = file
-
+        print(self.file)
         img = cv2.imread(self.file)
         self.text1 = pytesseract.image_to_string(img)
-        self.text_lines = self.text1.splitlines()
+        self.text_lines = self.text1.replace(" ", "")
+        self.text_lines = self.text_lines.lower()
+        self.text_lines = self.text_lines.splitlines()
         while "" in self.text_lines:
             self.text_lines.remove("")
-        self.text_lines = self.text_lines.replace(" ", "")
-        self.text_lines = self.text_lines.lower()
-
-
     def date(self):
         survey_date = self.text_lines[5]
+        print(survey_date)
         if survey_date == 'invoice':
             survey_date = self.text_lines[6]
         return survey_date
@@ -28,11 +29,13 @@ class Tesseract():
     def insurers(self):
         for i in self.text_lines:
             if 'ina/cwith:' in i:
+                print(i)
                 return i[10:].upper()
 
     def policy_num(self):
         for i in self.text_lines:
             if 'policyno.:' in i:
+                print(i)
                 return i[10:].upper()
 
     def total_amount(self):
@@ -60,52 +63,4 @@ class Tesseract():
             if 'ourref:' in i:
                 return i[7:].upper()
 
-call = Tesseract()
-our_ref = call.our_ref()
-branch = call.branch()
-insurers = call.insurers()
-date = call.date()
-total_amount = call.total_amount()
-policy = call.policy_num()
-
-c = 0
-df = pd.read_excel('gal.xlsx')
-a = df.iloc[:, 1]
-serial = df['SL NO'].iloc[-1]
-serial = serial + 1
-for i in a:
-    if our_ref == i:
-        c = 1
-
-if c == 0:
-    wb = openpyxl.load_workbook('gal.xlsx')
-    ws = wb.active
-    newRowLocation = ws.max_row + 1
-    ws.cell(column=1, row=newRowLocation, value=serial)
-    ws.cell(column=2, row=newRowLocation, value=our_ref)
-    ws.cell(column=4, row=newRowLocation, value=insurers)
-    ws.cell(column=5, row=newRowLocation, value=branch)
-    ws.cell(column=6, row=newRowLocation, value=policy)
-    ws.cell(column=7, row=newRowLocation, value=date)
-    ws.cell(column=9, row=newRowLocation, value=total_amount)
-    ws.cell(column=10, row=newRowLocation, value=total_amount)
-    ws.cell(column=13, row=newRowLocation, value='OPEN')
-    ft1 = Font(name='Arial', size=12)
-    for colNum in range(1, ws.max_column + 1):
-        ws.cell(row=newRowLocation, column=colNum).font = ft1
-        ws.cell(
-            row=newRowLocation,
-
-            column=colNum).alignment = Alignment(
-            horizontal='center',
-            vertical='center',
-            wrap_text=True)
-
-    wb.save('gal.xlsx')
-    wb.close()
-
-class main():
-    directory = 'folder'
-    for entry in os.scandir(directory):
-        Tesseract(entry)
 
