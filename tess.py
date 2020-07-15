@@ -11,7 +11,7 @@ def image_to_text(img):
     return a
 
 
-img = cv2.imread("sam.png")
+img = cv2.imread("test.png")
 text = image_to_text(img)
 text_lines = text.splitlines()
 while "" in text_lines:
