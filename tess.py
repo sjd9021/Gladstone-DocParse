@@ -1,74 +1,113 @@
 import cv2
 import pytesseract
 import os
-import csv
+import openpyxl
+import pandas as pd
+from openpyxl.styles import Font, Alignment
+
+class Folder():
+    directory = 'folder'
+    for entry in os.scandir(directory):
+        Tesseract(entry)
+
+class Tesseract():
+    def __init__(self, file):
+        self.file = file
+
+        img = cv2.imread(self.file)
+        self.text1 = pytesseract.image_to_string(img)
+        self.text_lines = self.text1.splitlines()
+        while "" in self.text_lines:
+            self.text_lines.remove("")
+        self.text_lines = self.text_lines.replace(" ", "")
+        self.text_lines = self.text_lines.lower()
 
 
-def image_to_text(img):
-    text1 = pytesseract.image_to_string(img)
-    a = text1.replace(" ", "")
-    a = a.lower()
-    return a
+    def date(self):
+        survey_date = self.text_lines[5]
+        if survey_date == 'invoice':
+            survey_date = self.text_lines[6]
+        return survey_date
 
+    def insurers(self):
+        for i in self.text_lines:
+            if 'ina/cwith:' in i:
+                return i[10:].upper()
 
-img = cv2.imread("test.png")
-text = image_to_text(img)
-text_lines = text.splitlines()
-while "" in text_lines:
-    text_lines.remove("")
+    def policy_num(self):
+        for i in self.text_lines:
+            if 'policyno.:' in i:
+                return i[10:].upper()
 
+    def total_amount(self):
+        a = self.text1.rfind('$')
+        return self.text1[a:a + 7]
 
-def date():
-    survey_date = text_lines[5]
-    if survey_date == 'invoice':
-        survey_date = text_lines[6]
-    return survey_date
+    def branch(self):
+        lists = []
+        with open('sam1.csv', 'r') as file:
+            x = file.read()
+            x = os.linesep.join([s for s in x.splitlines() if s])
+            x = x.splitlines()
+            for i in x:
+                if not i.isnumeric():
+                    lists.append(i)
+            insurer_branch = set(lists)
+        for i in insurer_branch:
+            if i.lower() in self.text1.lower():
+                return i.upper()
 
+    def our_ref(self):
+        for i in self.text_lines:
+            if 'ourref.:' in i:
+                return i[8:].upper()
+            if 'ourref:' in i:
+                return i[7:].upper()
 
-def insurers():
-    for i in text_lines:
-        if 'ina/cwith:' in i:
-            return i[10:].upper()
+our_ref = Tesseract().our_ref()
+branch = Tesseract().branch()
+insurers = Tesseract().insurers()
+date = Tesseract().date()
+total_amount = Tesseract().total_amount()
+policy = Tesseract().policy_num()
 
+c = 0
+df = pd.read_excel('gal.xlsx')
+a = df.iloc[:, 1]
+serial = df['SL NO'].iloc[-1]
+serial = serial + 1
+for i in a:
+    if our_ref == i:
+        c = 1
 
-def policy_num():
-    for i in text_lines:
-        if 'policyno.:' in i:
-            return i[10:].upper()
+if c == 0:
+    wb = openpyxl.load_workbook('gal.xlsx')
+    ws = wb.active
+    newRowLocation = ws.max_row + 1
+    ws.cell(column=1, row=newRowLocation, value=serial)
+    ws.cell(column=2, row=newRowLocation, value=our_ref)
+    ws.cell(column=4, row=newRowLocation, value=insurers)
+    ws.cell(column=5, row=newRowLocation, value=branch)
+    ws.cell(column=6, row=newRowLocation, value=policy)
+    ws.cell(column=7, row=newRowLocation, value=date)
+    ws.cell(column=9, row=newRowLocation, value=total_amount)
+    ws.cell(column=10, row=newRowLocation, value=total_amount)
+    ws.cell(column=13, row=newRowLocation, value='OPEN')
+    ft1 = Font(name='Arial', size=12)
+    for colNum in range(1, ws.max_column + 1):
+        ws.cell(row=newRowLocation, column=colNum).font = ft1
+        ws.cell(
+            row=newRowLocation,
+            column=colNum).alignment = Alignment(
+            horizontal='center',
+            vertical='center',
+            wrap_text=True)
 
+    wb.save('gal.xlsx')
+    wb.close()
 
-def total_amount():
-    a = text.rfind('$')
-    return text[a:a+7]
+class Folder():
+    directory = 'folder'
+    for entry in os.scandir(directory):
+        Tesseract(entry)
 
-
-
-def branch():
-    lists = []
-    with open('sam1.csv', 'r') as file:
-        x = file.read()
-        x = os.linesep.join([s for s in x.splitlines() if s])
-        x = x.splitlines()
-        for i in x:
-            if not i.isnumeric():
-                lists.append(i)
-        insurer_branch = set(lists)
-    for i in insurer_branch:
-        if i.lower() in text.lower():
-            return i.upper()
-
-
-def our_ref():
-    for i in text_lines:
-        if 'ourref.:' in i:
-            return i[8:].upper()
-        if 'ourref:' in i:
-            return i[7:].upper()
-
-
-our_ref = our_ref()
-branch = branch()
-insurers = insurers()
-date = date()
-total_amount = total_amount()
-policy = policy_num()
