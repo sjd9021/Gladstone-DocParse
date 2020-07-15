@@ -98,6 +98,7 @@ if c == 0:
         ws.cell(row=newRowLocation, column=colNum).font = ft1
         ws.cell(
             row=newRowLocation,
+
             column=colNum).alignment = Alignment(
             horizontal='center',
             vertical='center',
