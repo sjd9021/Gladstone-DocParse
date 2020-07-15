@@ -5,10 +5,6 @@ import openpyxl
 import pandas as pd
 from openpyxl.styles import Font, Alignment
 
-class Folder():
-    directory = 'folder'
-    for entry in os.scandir(directory):
-        Tesseract(entry)
 
 class Tesseract():
     def __init__(self, file):
@@ -64,12 +60,13 @@ class Tesseract():
             if 'ourref:' in i:
                 return i[7:].upper()
 
-our_ref = Tesseract().our_ref()
-branch = Tesseract().branch()
-insurers = Tesseract().insurers()
-date = Tesseract().date()
-total_amount = Tesseract().total_amount()
-policy = Tesseract().policy_num()
+call = Tesseract()
+our_ref = call.our_ref()
+branch = call.branch()
+insurers = call.insurers()
+date = call.date()
+total_amount = call.total_amount()
+policy = call.policy_num()
 
 c = 0
 df = pd.read_excel('gal.xlsx')
@@ -107,7 +104,7 @@ if c == 0:
     wb.save('gal.xlsx')
     wb.close()
 
-class Folder():
+class main():
     directory = 'folder'
     for entry in os.scandir(directory):
         Tesseract(entry)
