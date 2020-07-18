@@ -74,25 +74,32 @@ for entry in os.scandir(directory):
     total_amount = call.total_amount()
     policy = call.policy_num()
     print(our_ref)
-    # write code to check second column as well
     counter = 0
-    df = pd.read_excel('gal.xlsx', sheet_name='Open')
-    df2 = pd.read_excel('gal.xlsx', sheet_name='Closed')
+    df = pd.read_excel(
+        'Remittance Tally Master for PB 12.07.2020 2.xlsx',
+        sheet_name='Open')
+    df2 = pd.read_excel(
+        'Remittance Tally Master for PB 12.07.2020 2.xlsx',
+        sheet_name='Closed')
     a = df.iloc[:, 1]
     b = df.iloc[:, 2]
     a2 = df2.iloc[:, 1]
     b2 = df2.iloc[:, 2]
     serial = df['SL NO'].iloc[-1] + 1
+    b2 = b2.str.replace(" ", "")
+    a2 = a2.str.replace(" ", "")
+    a = a.str.replace(" ", "")
+    b = b.str.replace(" ", "")
 
     for i in a:
         if our_ref == i:
             counter = 1
-            print(our_ref + " This file exists in Open sheet")
+            print(our_ref + " This file exists in Open sheet" + i)
 
     for i in b:
         if our_ref == i:
             counter = 1
-            print(our_ref + " This file exists in Open sheet")
+            print(our_ref + " This file exists in the Open sheet" + i)
 
     for i in a2:
         if our_ref == i:
@@ -109,11 +116,12 @@ for entry in os.scandir(directory):
         print(f"error in  {our_ref}  please input manually ")
 
     if counter == 0:
-        wb = openpyxl.load_workbook('gal.xlsx')
+        wb = openpyxl.load_workbook(
+            'Remittance Tally Master for PB 12.07.2020 2.xlsx')
         ws = wb['Open']
         newRowLocation = ws.max_row + 1
+        print(newRowLocation)
         ws.cell(column=1, row=newRowLocation, value=serial)
-
         x = 1
         for i in our_ref:
             if i == 'G' or i == 'N':
@@ -139,7 +147,5 @@ for entry in os.scandir(directory):
                 vertical='center',
                 wrap_text=True
             )
-        wb.save('gal.xlsx')
+        wb.save('Remittance Tally Master for PB 12.07.2020 2.xlsx')
         wb.close()
-
-
