@@ -138,6 +138,7 @@ for entry in os.scandir(directory):
         ws.cell(column=10, row=newRowLocation, value=total_amount)
         ws.cell(column=13, row=newRowLocation, value='OPEN')
         ft1 = Font(name='Arial', size=12)
+
         for colNum in range(1, ws.max_column + 1):
             ws.cell(row=newRowLocation, column=colNum).font = ft1
             ws.cell(
